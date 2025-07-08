@@ -1,0 +1,186 @@
+<main>
+  <h2>Find a Car</h2>
+
+  <!-- Step 1: Make -->
+  <div id="step-make">
+    <label for="makeSelect">Select Make:</label>
+    <select id="makeSelect">
+      <option value="">-- Choose Make --</option>
+    </select>
+  </div>
+
+  <!-- Step 2: Model -->
+  <div id="step-model" style="display:none;">
+    <label for="modelSelect">Select Model:</label>
+    <select id="modelSelect">
+      <option value="">-- Choose Model --</option>
+    </select>
+  </div>
+
+  <!-- Step 3: Price -->
+  <div id="step-price" style="display:none;">
+    <label>Enter Price Range:</label><br>
+    Min: <input type="number" id="minPrice" placeholder="Min Price" />
+    Max: <input type="number" id="maxPrice" placeholder="Max Price" />
+    <button id="goToYear">Next</button>
+  </div>
+
+  <!-- Step 4: Year -->
+  <div id="step-year" style="display:none;">
+    <label for="yearSelect">Select Year:</label>
+    <select id="yearSelect">
+      <option value="">-- Choose Year --</option>
+    </select>
+  </div>
+
+  <div id="carList" style="margin-top: 20px;"></div>
+
+  <style>
+    main {
+      background: #000;
+      color: white;
+      padding: 20px;
+    }
+    select, input {
+      background: #111;
+      color: white;
+      border: 1px solid #333;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+    .car-box {
+      background: #111;
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .car-box span {
+      color: limegreen;
+    }
+    button {
+      background: limegreen;
+      color: #000;
+      padding: 8px 12px;
+      border: none;
+      margin-top: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+
+  <script>
+    let cars = [];
+
+    const makeSelect = document.getElementById('makeSelect');
+    const modelSelect = document.getElementById('modelSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    const minPrice = document.getElementById('minPrice');
+    const maxPrice = document.getElementById('maxPrice');
+    const carList = document.getElementById('carList');
+
+    fetch('cars.json')
+      .then(res => res.json())
+      .then(data => {
+        cars = data;
+        showRandomCars();
+        populateMakes();
+        populateYears();
+      });
+
+    function showRandomCars() {
+      const randomCars = cars.sort(() => 0.5 - Math.random()).slice(0, 5);
+      displayCars(randomCars);
+    }
+
+    function populateMakes() {
+      const makes = [...new Set(cars.map(c => c.make))];
+      makes.forEach(make => {
+        const opt = document.createElement('option');
+        opt.value = make;
+        opt.textContent = make;
+        makeSelect.appendChild(opt);
+      });
+    }
+
+    function populateYears() {
+      const years = [...new Set(cars.map(c => c.year))].sort((a, b) => b - a);
+      years.forEach(year => {
+        const opt = document.createElement('option');
+        opt.value = year;
+        opt.textContent = year;
+        yearSelect.appendChild(opt);
+      });
+    }
+
+    makeSelect.addEventListener('change', () => {
+      const selectedMake = makeSelect.value;
+      if (!selectedMake) return;
+
+      // Hide make, show model
+      document.getElementById('step-make').style.display = 'none';
+      document.getElementById('step-model').style.display = 'block';
+
+      const models = [...new Set(cars.filter(c => c.make === selectedMake).map(c => c.model))];
+      modelSelect.innerHTML = '<option value="">-- Choose Model --</option>';
+      models.forEach(model => {
+        const opt = document.createElement('option');
+        opt.value = model;
+        opt.textContent = model;
+        modelSelect.appendChild(opt);
+      });
+    });
+
+    modelSelect.addEventListener('change', () => {
+      if (!modelSelect.value) return;
+      document.getElementById('step-model').style.display = 'none';
+      document.getElementById('step-price').style.display = 'block';
+    });
+
+    document.getElementById('goToYear').addEventListener('click', () => {
+      if (!minPrice.value || !maxPrice.value) return alert("Please enter price range");
+      document.getElementById('step-price').style.display = 'none';
+      document.getElementById('step-year').style.display = 'block';
+    });
+
+    yearSelect.addEventListener('change', () => {
+      const make = makeSelect.value;
+      const model = modelSelect.value;
+      const year = yearSelect.value;
+      const min = parseInt(minPrice.value) || 0;
+      const max = parseInt(maxPrice.value) || Infinity;
+
+      const filtered = cars.filter(c =>
+        c.make === make &&
+        c.model === model &&
+        c.year === year &&
+        c.price >= min && c.price <= max
+      );
+
+      displayCars(filtered);
+    });
+
+    function displayCars(list) {
+      carList.innerHTML = '';
+      if (list.length === 0) {
+        carList.innerHTML = '<p>No cars found.</p>';
+        return;
+      }
+
+      list.forEach(car => {
+        const div = document.createElement('div');
+        div.className = 'car-box';
+div.innerHTML = `
+  <img src="${car.image}" alt="${car.make} ${car.model}" style="width:100%; max-width:300px; border-radius:5px; margin-bottom:10px;" loading="lazy" />
+  <strong>${car.make} ${car.model}</strong><br>
+  <span>Year:</span> ${car.year} | 
+  <span>Price:</span> Ksh ${car.price.toLocaleString()}<br>
+  <span>Fuel:</span> ${car.fuel || 'N/A'} | 
+  <span>Transmission:</span> ${car.transmission || 'N/A'}
+`;
+        carList.appendChild(div);
+      });
+    }
+  </script>
+</main>
