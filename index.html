@@ -80,7 +80,7 @@
     const maxPrice = document.getElementById('maxPrice');
     const carList = document.getElementById('carList');
 
-    fetch('cars.json')
+    fetch('cars/cars.json')
       .then(res => res.json())
       .then(data => {
         cars = data;
