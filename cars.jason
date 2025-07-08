@@ -1,0 +1,29 @@
+[
+  {
+    "make": "Toyota",
+    "model": "Vitz",
+    "year": "2020",
+    "price": 870000,
+    "fuel": "Petrol",
+    "transmission": "Automatic",
+    "image": "toyota-vitz.png"
+  },
+  {
+    "make": "Mazda",
+    "model": "Demio",
+    "year": "2021",
+    "price": 990000,
+    "fuel": "Petrol",
+    "transmission": "Manual",
+    "image": "mazda-demio.png"
+  },
+  {
+    "make": "Honda",
+    "model": "Fit",
+    "year": "2019",
+    "price": 940000,
+    "fuel": "Hybrid",
+    "transmission": "Automatic",
+    "image": "honda-fit.png"
+  }
+]
